@@ -12,6 +12,8 @@ Professional home cook. Focus on achieving authentic, native taste, flavour, and
 
 ## Inventory & Ingredients
 - **`inventory_pl.md`** - current pantry inventory (spices, sauces, oils etc.). Optimise recipes around what's already available. If something essential is missing, clearly mark it as "DO KUPIENIA" (to buy).
+- Inventory uses checkboxes: `[x]` = in stock, `[ ]` = not in stock / to buy.
+- When a recipe needs a new ingredient, update the inventory file accordingly.
 
 ## Recipe Structure
 Path: `{language}/{type_or_origin}/{name}.md`
@@ -20,19 +22,30 @@ Path: `{language}/{type_or_origin}/{name}.md`
 
 ## Recipe Format (template)
 Each recipe must contain:
-1. **Header** - dish name, version, number of servings
+1. **Header** - dish name version number (`# Dish Name vX.X`), followed by a bold line with key parameters (servings, temperature, key timing)
 2. **Description** - short description of the dish and its character (1-2 sentences)
-3. **Ingredients** - grouped logically (base, sauce, marinade etc.), with exact weights
-   - Mark which ingredients are from inventory vs. need to be bought
-4. **Step-by-step instructions** - numbered steps with precise times and temperatures
-5. **Ingredient impact notes** - explanations why a given ingredient matters (inline or in a dedicated section)
-6. **Notes** - tips, variants, what to avoid, lessons from kitchen tests
+3. **Origin** - history of the dish, key principles of the cuisine/standard (e.g. AVPN for pizza). Helps understand *why* certain rules exist.
+4. **Ingredients** - grouped logically (base, sauce, marinade etc.), with exact weights
+   - Cross-reference with `inventory_pl.md` - items in stock need no marker
+   - For baking: include Baker's % calculation table
+   - When authentic ingredients aren't available in Poland, provide substitutes with explanation of the difference (e.g. tamarind paste vs apple cider vinegar, flour "00" vs typ 500)
+5. **Step-by-step instructions** - numbered steps with precise times and temperatures, grouped in `####` sub-steps
+6. **Understand ingredients** - dedicated section explaining *why* each key ingredient matters and what happens if you misuse it. Anti-patterns welcome ("what not to do"). Cross-reference lessons from other recipes when relevant.
+7. **Notes** - tips, variants, what to avoid, lessons from kitchen tests
+8. **Calorie table** *(optional)* - calorie breakdown per ingredient and per serving, in table format
 
 ## Writing Style (for `pl/` recipes)
 - Polish language, concise and concrete
 - Imperative mood in instructions ("Podsmaż", "Dodaj", "Mieszaj")
-- Emoji in section headers (as in the existing chicken_korma.md)
 - Markdown heading levels: `#` dish name, `###` sections, `####` sub-steps
+- Consistent emoji in section headers: `🛒` ingredients, `👨‍🍳` instructions, `🧪` understand ingredients, `💡` notes, `🌏` origin, `📐` calculations, `📊` calorie table
+- Version the recipe (v1.0, v2.1 etc.) - bump version when updating after kitchen tests
+
+## Cooking Knowledge & Patterns
+- **Reduction is key** - sauces must be reduced before adding thickener-like ingredients (yogurt, coconut milk). Lesson learned from Korma and applied to Pad Thai.
+- **Stir-fry technique** - sear meat in batches (never all at once), heat sauce on empty pan until bubbling, then add noodles/meat. Noodles "drink" the sauce on the pan.
+- **Rice noodles** - always undercook (2-3 min shorter than package) before stir-frying, as they absorb sauce on the pan. Overcooked noodles won't absorb anything.
+- **Polish substitutes** - when authentic ingredients are unavailable, explain the trade-off clearly (taste difference, adjusted ratios). Mark the original as preferred when it becomes available.
 
 ## Root-Level Files
 - All files in the repository root are written in English.
