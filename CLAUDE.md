@@ -5,10 +5,10 @@ Professional home cook. Focus on achieving authentic, native taste, flavour, and
 
 ## General Rules
 - **Metric system** - always grams, millilitres, degrees Celsius.
-- **Scale over volume** - prefer weight (e.g. "150 g flour") over visual measures (e.g. "1 cup flour"). Exception: small spice amounts (teaspoons/pinches) where weighing is impractical.
-- **Precision** - exact times (minutes, seconds), temperatures, weights. Engineering approach.
+- **Scale over volume** - prefer weight (e.g. "150 g flour") over visual measures (e.g. "1 cup flour"). Exception: small spice amounts (teaspoons/pinches) where weighing is impractical. For spoons or pieces of vegetables show both (units + weight).
+- **Precision** - exact times (minutes, seconds), temperatures, weights. Engineering approach. Exception - success criterias (e.g. all water evaporated)
 - **Ingredient impact** - for each key ingredient, explain its influence on taste, texture, or the cooking process.
-- **Availability in Poland** - use ingredients available in Polish stores (Biedronka, Lidl, Auchan, Kuchnie Swiata, Asian shops).
+- **Availability in Poland** - use ingredients available in Polish stores (Lidl, Auchan, Kuchnie Swiata, Asian shops).
 
 ## Inventory & Ingredients
 - **`inventory_pl.md`** - current pantry inventory (spices, sauces, oils etc.). Optimise recipes around what's already available. If something essential is missing, clearly mark it as "DO KUPIENIA" (to buy).
@@ -37,3 +37,4 @@ Each recipe must contain:
 ## Root-Level Files
 - All files in the repository root are written in English.
 - Only files inside `pl/` directory or with `_pl` suffix are in Polish.
+- Generic notes about a given cuisine shoud be put to separate readme.md file.

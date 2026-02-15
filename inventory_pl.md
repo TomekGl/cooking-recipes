@@ -44,6 +44,7 @@
 - [x] Sos sojowy ciemny
 - [x] Sos słodki chilli
 - [x] Mleko kokosowe
+- [ ] Pasta tamaryndowa 🛒 DO KUPIENIA
 
 ### Tłuszcze
 - [x] Olej kokosowy
