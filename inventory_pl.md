@@ -7,6 +7,7 @@
 - [x] Red curry
 - [x] Chilli / Pieprz cayenne
 - [x] Przyprawa do ziemniaków
+- [x] Mieszanka Korma Curry (kolendra,kurkuma,kozieradka,kmin rzymski,papryka słodka czerwona, pieprz biały, imbir, kardamon, chilli, cosnek)
 
 ### Zioła Suszone
 - [x] Rozmaryn
@@ -19,6 +20,7 @@
 - [x] Kurkuma mielona
 - [x] Cynamon
 - [x] Imbir
+- [x] Imbir świeży
 - [x] Gałka muszkatołowa
 - [x] Kardamon mielony
 - [x] Anyż gwiaździsty (mielony)
@@ -53,14 +55,14 @@
 
 ### Bazy i Inne
 - [x] Passata pomidorowa
-- [ ] Pomidory
+- [ ] Pomidory San Marzano DOP (puszka) 🛒 DO KUPIENIA
 - [x] Masło orzechowe
 - [x] Ocet jabłkowy
 - [ ] Mozzarella
 - [ ] Mozzarella di Bufala Campana DOP
 - [x] Mąka typ 500
-- [ ] Mąka typ "00"
-- [ ] Semolina
+- [ ] Mąka typ "00" (Caputo Pizzeria) 🛒 DO KUPIENIA
+- [x] Semolina
+- [x] Drożdże świeże
+- [x] Bazylia świeża
 
----
-*Ostatnia aktualizacja: 15.02.2026*
