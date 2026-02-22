@@ -52,6 +52,7 @@
 ### Tłuszcze
 - [x] Olej kokosowy
 - [x] Oliwa z oliwek
+- [x] Olej lniany
 - [ ] Olej sezamowy
 
 ### Bazy i Inne
@@ -59,6 +60,10 @@
 - [ ] Pomidory San Marzano DOP (puszka) 🛒 DO KUPIENIA
 - [x] Masło orzechowe
 - [x] Ocet jabłkowy
+- [x] Ocet balsamiczny
+- [x] Sos BBQ
+- [x] Słodki sos chilli 
+- [x] Koncentrat pomidorowy
 - [ ] Mozzarella
 - [ ] Mozzarella di Bufala Campana DOP
 - [x] Mąka typ 500
