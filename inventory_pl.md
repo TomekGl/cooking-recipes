@@ -8,6 +8,7 @@
 - [x] Chilli / Pieprz cayenne
 - [x] Przyprawa do ziemniaków
 - [x] Mieszanka Korma Curry (kolendra,kurkuma,kozieradka,kmin rzymski,papryka słodka czerwona, pieprz biały, imbir, kardamon, chilli, cosnek)
+- [x] Mieszanka 5 smaków (sól Himalajska, anyż mielony, pieprz czarny mielony, Cynamon mielony, Koper włoski mielony, goździki mielone)
 
 ### Zioła Suszone
 - [x] Rozmaryn
