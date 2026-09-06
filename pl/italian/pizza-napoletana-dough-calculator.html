@@ -1,0 +1,691 @@
+<!--
+  SPDX-License-Identifier: GPL-3.0-or-later
+  Copyright (c) 2026 Tomasz Głuch
+-->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator ciasta na pizzę</title>
+<link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf7f2;
+    --fg: #2b2420;
+    --card: #ffffff;
+    --border: #e0d8cc;
+    --accent: #b5502e;
+    --accent-soft: #f1e0d6;
+    --muted: #7a6f63;
+    --warn-bg: #fff1e0;
+    --warn-border: #d98a3d;
+    --ok-bg: #eaf3e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1815;
+      --fg: #ece5dd;
+      --card: #26211d;
+      --border: #3a332c;
+      --accent: #e08a5f;
+      --accent-soft: #3a2b22;
+      --muted: #b0a495;
+      --warn-bg: #3a2c14;
+      --warn-border: #d98a3d;
+      --ok-bg: #1f2a1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    line-height: 1.4;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; border-bottom: 2px solid var(--accent-soft); padding-bottom: 6px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .row label {
+    flex: 0 0 190px;
+    font-size: 0.88rem;
+  }
+  .row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .row .val {
+    flex: 0 0 64px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.88rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .row input[type=number], .row input[type=time] {
+    flex: 0 0 90px;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 6px;
+  }
+  .choice-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .choice-group button {
+    flex: 1;
+    min-width: 90px;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .choice-group button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .note {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .warning {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.87rem;
+    margin-top: 10px;
+  }
+  .schedule-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .schedule-item:last-child { border-bottom: none; }
+  .schedule-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .schedule-label { flex: 1; padding-right: 12px; }
+  .schedule-sub { font-size: 0.78rem; color: var(--muted); }
+  .day-tag { font-size: 0.72rem; color: var(--muted); margin-left: 6px; }
+  details summary { cursor: pointer; font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; }
+  .adv-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; }
+  .adv-row label { flex: 0 0 260px; color: var(--muted); }
+  .adv-row input { width: 90px; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; }
+  .flour-warn { font-size: 0.8rem; color: var(--warn-border); margin-top: 6px; }
+  .lang-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .lang-row .choice-group { max-width: 120px; }
+  .footer { text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="lang-row">
+  <div class="choice-group" id="langToggle">
+    <button data-lang="pl" class="active">PL</button>
+    <button data-lang="en">EN</button>
+  </div>
+</div>
+
+<h1 data-i18n="title">🍕 Kalkulator ciasta na pizzę</h1>
+<div class="subtitle" data-i18n="subtitle">Skład (Baker's %) + harmonogram fermentacji wsteczny od godziny wypieku. Bazuje na pizza_napoletana.md (14°C → 20-22h).</div>
+
+<div class="card">
+  <h2 data-i18n="h2_ingredients">🛒 Skład ciasta</h2>
+
+  <div class="row">
+    <label for="balls" data-i18n="label_balls">Liczba kulek</label>
+    <input type="range" id="balls" min="1" max="12" step="1" value="4">
+    <span class="val" id="balls-val">4</span>
+  </div>
+
+  <div class="row">
+    <label for="ballMass" data-i18n="label_ballMass">Masa kulki (g)</label>
+    <input type="range" id="ballMass" min="150" max="350" step="5" value="200">
+    <span class="val" id="ballMass-val">200</span>
+  </div>
+
+  <div class="row">
+    <label data-i18n="label_flourType">Typ mąki</label>
+    <div class="choice-group" id="flourType">
+      <button data-flour="00" class="active">tipo "00"</button>
+      <button data-flour="500">typ 500</button>
+      <button data-flour="450">typ 450</button>
+    </div>
+  </div>
+  <div class="flour-warn" id="flour-warn" style="display:none;"></div>
+
+  <div class="row">
+    <label for="hydration" data-i18n="label_hydration">Hydratacja (%)</label>
+    <input type="range" id="hydration" min="50" max="70" step="0.5" value="62">
+    <span class="val" id="hydration-val">62%</span>
+  </div>
+
+  <div class="row">
+    <label for="yeastPct" data-i18n="label_yeastPct">Modyfikator drożdży</label>
+    <input type="range" id="yeastPct" min="50" max="200" step="5" value="100">
+    <span class="val" id="yeastPct-val">100%</span>
+  </div>
+
+  <table>
+    <thead><tr><th data-i18n="th_ingredient">Składnik</th><th class="num" data-i18n="th_amount">Ilość</th><th class="num" data-i18n="th_bakers">Baker's %</th></tr></thead>
+    <tbody id="ingredients-body"></tbody>
+  </table>
+  <div class="note" id="yeast-note"></div>
+</div>
+
+<div class="card">
+  <h2 data-i18n="h2_process">👨‍🍳 Proces</h2>
+
+  <div class="row">
+    <label data-i18n="label_seasonPreset">Szybkie ustawienie</label>
+    <div class="choice-group" id="seasonPreset">
+      <button data-season="winter" data-i18n="preset_winter">Zima (24° / 15°)</button>
+      <button data-season="summer" data-i18n="preset_summer">Lato (25° / 21°)</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="kitchenT" data-i18n="label_kitchenT">Temperatura kuchni (°C)</label>
+    <input type="range" id="kitchenT" min="16" max="32" step="0.5" value="25">
+    <span class="val" id="kitchenT-val">25°C</span>
+  </div>
+
+  <div class="row">
+    <label for="pantryT" data-i18n="label_pantryT">Temperatura spiżarni (°C)</label>
+    <input type="range" id="pantryT" min="4" max="24" step="0.5" value="19">
+    <span class="val" id="pantryT-val">19°C</span>
+  </div>
+
+  <div class="row">
+    <label for="fridgeT" data-i18n="label_fridgeT">Temperatura lodówki (°C)</label>
+    <input type="range" id="fridgeT" min="1" max="14" step="0.5" value="6">
+    <span class="val" id="fridgeT-val">6°C</span>
+  </div>
+
+  <div class="row">
+    <label for="bakeTime" data-i18n="label_bakeTime">Godzina wypieku</label>
+    <input type="time" id="bakeTime" value="16:00">
+  </div>
+
+  <div class="row">
+    <label data-i18n="label_path">Ścieżka fermentacji</label>
+    <div class="choice-group" id="pathType">
+      <button data-path="fridge" data-i18n="path_fridge" class="active">kuchnia → lodówka → kuchnia</button>
+      <button data-path="pantry" data-i18n="path_pantry">kuchnia → spiżarnia → kuchnia</button>
+    </div>
+  </div>
+
+  <div id="warnings"></div>
+
+  <h2 style="margin-top:20px;" data-i18n="h2_schedule">📅 Harmonogram</h2>
+  <div id="schedule"></div>
+
+  <details style="margin-top:16px;">
+    <summary data-i18n="details_summary">Szczegóły obliczeń (godziny-ekwiwalentne @ Tref)</summary>
+    <div id="calc-details" class="note"></div>
+  </details>
+</div>
+
+<details class="card">
+  <summary data-i18n="adv_summary">⚙️ Ustawienia zaawansowane (kalibracja modelu)</summary>
+  <div class="adv-row">
+    <label for="adv-tref" data-i18n="adv_tref">Temperatura referencyjna Tref (°C)</label>
+    <input type="number" id="adv-tref" step="0.5" value="14">
+  </div>
+  <div class="adv-row">
+    <label for="adv-double" data-i18n="adv_double">Podwojenie tempa co (°C)</label>
+    <input type="number" id="adv-double" step="0.5" value="10">
+  </div>
+  <div class="adv-row">
+    <label for="adv-basemain" data-i18n="adv_basemain">Baza fermentacji głównej (h @ Tref, 100% drożdży)</label>
+    <input type="number" id="adv-basemain" step="0.5" value="21">
+  </div>
+  <div class="adv-row">
+    <label for="adv-bulkh" data-i18n="adv_bulkh">Baza bulk (h)</label>
+    <input type="number" id="adv-bulkh" step="0.25" value="2">
+  </div>
+  <div class="adv-row">
+    <label for="adv-bulkt" data-i18n="adv_bulkt">Baza bulk — temperatura odniesienia (°C)</label>
+    <input type="number" id="adv-bulkt" step="0.5" value="21">
+  </div>
+  <div class="adv-row">
+    <label for="adv-finalh" data-i18n="adv_finalh">Baza finiszu (h)</label>
+    <input type="number" id="adv-finalh" step="0.25" value="2.5">
+  </div>
+  <div class="adv-row">
+    <label for="adv-finalt" data-i18n="adv_finalt">Baza finiszu — temperatura odniesienia (°C)</label>
+    <input type="number" id="adv-finalt" step="0.5" value="24.5">
+  </div>
+  <div class="note" data-i18n="adv_note">Baza finiszu (2,5h @ 24,5°C) to realny punkt kalibracyjny z testu — dobre cornicione, łatwe rozciąganie. Zaktualizuj te wartości, jeśli kolejne wypieki pokażą inny optymalny czas.</div>
+</details>
+
+<div class="footer">
+  Author: <a href="https://github.com/TomekGl/cooking-recipes/tree/master/pl/italian">Tomasz Głuch</a> · License: GNU General Public License (GPL)
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const FLOUR_PRESETS = {
+  "00": { hydration: 62, warnKey: null },
+  "500": { hydration: 60, warnKey: null },
+  "450": { hydration: 58, warnKey: "flour_warn_450" }
+};
+
+const I18N = {
+  pl: {
+    title: "🍕 Kalkulator ciasta na pizzę",
+    subtitle: "Skład (Baker's %) + harmonogram fermentacji wsteczny od godziny wypieku. Bazuje na pizza_napoletana.md (14°C → 20-22h).",
+    h2_ingredients: "🛒 Skład ciasta",
+    label_balls: "Liczba kulek",
+    label_ballMass: "Masa kulki (g)",
+    label_flourType: "Typ mąki",
+    label_hydration: "Hydratacja (%)",
+    label_yeastPct: "Modyfikator drożdży",
+    th_ingredient: "Składnik",
+    th_amount: "Ilość",
+    th_bakers: "Baker's %",
+    ing_flour: "Mąka",
+    ing_water: "Woda (~20°C)",
+    ing_salt: "Sól",
+    ing_yeast: "Drożdże świeże",
+    ing_total: "Razem ciasto",
+    yeast_note_base: "100% = baza z przepisu (0,3% wagi mąki, świeże drożdże).",
+    yeast_note_mod: "{pct}% bazowej ilości drożdży → efektywnie {eff}% wagi mąki. {effect}",
+    yeast_effect_fast: "Szybsza fermentacja, krótszy dopuszczalny czas.",
+    yeast_effect_slow: "Wolniejsza fermentacja, dłuższe okno czasowe, większy margines błędu.",
+    flour_warn_450: "Mąka tortowa (typ 450) ma słaby gluten (niska siła W) — nietypowy wybór do pizzy neapolitańskiej. Ciasto może być kruche i trudne w rozciąganiu; hydratacja obniżona zapobiegawczo.",
+    h2_process: "👨‍🍳 Proces",
+    label_seasonPreset: "Szybkie ustawienie",
+    preset_winter: "Zima (24° / 15°)",
+    preset_summer: "Lato (25° / 21°)",
+    label_kitchenT: "Temperatura kuchni (°C)",
+    label_pantryT: "Temperatura spiżarni (°C)",
+    label_fridgeT: "Temperatura lodówki (°C)",
+    label_bakeTime: "Godzina wypieku",
+    label_path: "Ścieżka fermentacji",
+    path_fridge: "kuchnia → lodówka → kuchnia",
+    path_pantry: "kuchnia → spiżarnia → kuchnia",
+    pathWords: {
+      fridge: { nom: "Lodówka", gen: "lodówki", loc: "lodówce" },
+      pantry: { nom: "Spiżarnia", gen: "spiżarni", loc: "spiżarni" }
+    },
+    h2_schedule: "📅 Harmonogram",
+    sched_bulkStart: "Zagniatanie / start bulk",
+    sched_mainIn: "Koniec bulk → podział na kulki",
+    sched_mainIn_sub: "{h} bulk w kuchni",
+    sched_toPath: "Kulki do: {path} ({temp}°C)",
+    sched_mainOut: "Wyjęcie z {path} → kuchnia",
+    sched_mainOut_sub: "{h} w {path}",
+    sched_bake: "Formowanie i pieczenie",
+    sched_bake_sub: "{h} finisz w kuchni",
+    day_prev: " (dzień wcześniej)",
+    day_prevN: " ({n} dni wcześniej)",
+    day_nextN: " (+{n} dni)",
+    warn_tooShort: "Przy tej ilości drożdży faza główna w {path} wychodzi bardzo krótka ({h}). Rozważ mniej drożdży (niższy modyfikator) albo pominięcie tej fazy i dłuższy finisz w kuchni.",
+    warn_night: "Godzina zagniatania wypada w nocy ({time}). Rozważ inną godzinę wypieku albo zmień modyfikator drożdży / ścieżkę fermentacji.",
+    details_summary: "Szczegóły obliczeń (godziny-ekwiwalentne @ Tref)",
+    details_bulk: "Bulk ekwiwalent: {equiv}h @ {tref}°C (baza {baseH}h @ {baseT}°C) → {h} w kuchni {kitchenT}°C",
+    details_main: "Faza główna ekwiwalent: {equiv}h @ {tref}°C (baza {baseH}h × 100/{pct}% drożdży) → {h} w {path} {mainT}°C",
+    details_final: "Finisz ekwiwalent: {equiv}h @ {tref}°C (baza {baseH}h @ {baseT}°C) → {h} w kuchni {kitchenT}°C",
+    details_rate: "rate_ratio(kuchnia {kitchenT}°C) = {r1}",
+    details_rate2: "rate_ratio({path} {mainT}°C) = {r2}",
+    adv_summary: "⚙️ Ustawienia zaawansowane (kalibracja modelu)",
+    adv_tref: "Temperatura referencyjna Tref (°C)",
+    adv_double: "Podwojenie tempa co (°C)",
+    adv_basemain: "Baza fermentacji głównej (h @ Tref, 100% drożdży)",
+    adv_bulkh: "Baza bulk (h)",
+    adv_bulkt: "Baza bulk — temperatura odniesienia (°C)",
+    adv_finalh: "Baza finiszu (h)",
+    adv_finalt: "Baza finiszu — temperatura odniesienia (°C)",
+    adv_note: "Baza finiszu (2,5h @ 24,5°C) to realny punkt kalibracyjny z testu — dobre cornicione, łatwe rozciąganie. Zaktualizuj te wartości, jeśli kolejne wypieki pokażą inny optymalny czas."
+  },
+  en: {
+    title: "🍕 Pizza Dough Calculator",
+    subtitle: "Composition (Baker's %) + fermentation schedule worked backward from bake time. Based on pizza_napoletana.md (14°C → 20-22h).",
+    h2_ingredients: "🛒 Dough composition",
+    label_balls: "Number of balls",
+    label_ballMass: "Ball weight (g)",
+    label_flourType: "Flour type",
+    label_hydration: "Hydration (%)",
+    label_yeastPct: "Yeast modifier",
+    th_ingredient: "Ingredient",
+    th_amount: "Amount",
+    th_bakers: "Baker's %",
+    ing_flour: "Flour",
+    ing_water: "Water (~20°C)",
+    ing_salt: "Salt",
+    ing_yeast: "Fresh yeast",
+    ing_total: "Total dough",
+    yeast_note_base: "100% = recipe baseline (0.3% of flour weight, fresh yeast).",
+    yeast_note_mod: "{pct}% of baseline yeast → effectively {eff}% of flour weight. {effect}",
+    yeast_effect_fast: "Faster fermentation, shorter allowed time.",
+    yeast_effect_slow: "Slower fermentation, longer window, bigger margin for error.",
+    flour_warn_450: "Cake flour (typ 450) has weak gluten (low W strength) — an unusual choice for Neapolitan pizza. The dough may be brittle and hard to stretch; hydration lowered as a precaution.",
+    h2_process: "👨‍🍳 Process",
+    label_seasonPreset: "Quick preset",
+    preset_winter: "Winter (24° / 15°)",
+    preset_summer: "Summer (25° / 21°)",
+    label_kitchenT: "Kitchen temperature (°C)",
+    label_pantryT: "Pantry temperature (°C)",
+    label_fridgeT: "Fridge temperature (°C)",
+    label_bakeTime: "Bake time",
+    label_path: "Fermentation path",
+    path_fridge: "kitchen → fridge → kitchen",
+    path_pantry: "kitchen → pantry → kitchen",
+    pathWords: {
+      fridge: { nom: "Fridge", gen: "fridge", loc: "fridge" },
+      pantry: { nom: "Pantry", gen: "pantry", loc: "pantry" }
+    },
+    h2_schedule: "📅 Schedule",
+    sched_bulkStart: "Mixing / bulk start",
+    sched_mainIn: "End of bulk → divide into balls",
+    sched_mainIn_sub: "{h} bulk in kitchen",
+    sched_toPath: "Balls into: {path} ({temp}°C)",
+    sched_mainOut: "Remove from {path} → kitchen",
+    sched_mainOut_sub: "{h} in {path}",
+    sched_bake: "Shape and bake",
+    sched_bake_sub: "{h} finish in kitchen",
+    day_prev: " (previous day)",
+    day_prevN: " ({n} days earlier)",
+    day_nextN: " (+{n} days)",
+    warn_tooShort: "With this yeast amount, the main phase in the {path} comes out very short ({h}). Consider less yeast (lower modifier) or skipping this phase for a longer kitchen finish.",
+    warn_night: "Mixing time falls in the middle of the night ({time}). Consider a different bake time or adjust the yeast modifier / fermentation path.",
+    details_summary: "Calculation details (equivalent hours @ Tref)",
+    details_bulk: "Bulk equivalent: {equiv}h @ {tref}°C (base {baseH}h @ {baseT}°C) → {h} in kitchen {kitchenT}°C",
+    details_main: "Main phase equivalent: {equiv}h @ {tref}°C (base {baseH}h × 100/{pct}% yeast) → {h} in {path} {mainT}°C",
+    details_final: "Finish equivalent: {equiv}h @ {tref}°C (base {baseH}h @ {baseT}°C) → {h} in kitchen {kitchenT}°C",
+    details_rate: "rate_ratio(kitchen {kitchenT}°C) = {r1}",
+    details_rate2: "rate_ratio({path} {mainT}°C) = {r2}",
+    adv_summary: "⚙️ Advanced settings (model calibration)",
+    adv_tref: "Reference temperature Tref (°C)",
+    adv_double: "Rate doubles every (°C)",
+    adv_basemain: "Main fermentation base (h @ Tref, 100% yeast)",
+    adv_bulkh: "Bulk base (h)",
+    adv_bulkt: "Bulk base — reference temperature (°C)",
+    adv_finalh: "Finish base (h)",
+    adv_finalt: "Finish base — reference temperature (°C)",
+    adv_note: "The finish base (2.5h @ 24.5°C) is a real calibration point from a test — good cornicione, easy to stretch. Update these values if future bakes show a different optimum."
+  }
+};
+
+function t(key, params) {
+  let s = (I18N[state.lang] && I18N[state.lang][key]) || I18N.pl[key] || key;
+  if (params) {
+    for (const k in params) s = s.split("{" + k + "}").join(params[k]);
+  }
+  return s;
+}
+
+function applyStaticI18n() {
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("#langToggle button").forEach(b => b.classList.toggle("active", b.dataset.lang === state.lang));
+}
+
+let state = {
+  lang: "pl",
+  balls: 4, ballMass: 200, flour: "00", hydration: 62, yeastPct: 100,
+  kitchenT: 25, pantryT: 19, fridgeT: 6, bakeTime: "16:00", path: "fridge",
+  advTref: 14, advDouble: 10, advBaseMain: 21, advBulkH: 2, advBulkT: 21, advFinalH: 2.5, advFinalT: 24.5
+};
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("pizzaCalcState") || "{}");
+    Object.assign(state, saved);
+  } catch (e) { /* ignore corrupt storage */ }
+}
+function saveState() {
+  try { localStorage.setItem("pizzaCalcState", JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+}
+
+function rateRatio(T) {
+  return Math.pow(2, (T - state.advTref) / state.advDouble);
+}
+
+function fmtHours(h) {
+  if (h < 0) h = 0;
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  return hh + "h" + (mm ? " " + mm + "min" : "");
+}
+
+function parseBakeTime() {
+  const [hh, mm] = state.bakeTime.split(":").map(Number);
+  const d = new Date();
+  d.setHours(hh, mm, 0, 0);
+  return d;
+}
+
+function fmtClock(d) {
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+function dayTag(target, reference) {
+  const td = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  const r = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
+  const diffDays = Math.round((td - r) / 86400000);
+  if (diffDays === 0) return "";
+  if (diffDays === -1) return t("day_prev");
+  if (diffDays < -1) return t("day_prevN", { n: -diffDays });
+  return t("day_nextN", { n: diffDays });
+}
+
+function computeIngredients() {
+  const totalDough = state.balls * state.ballMass;
+  const yeastEffectivePct = 0.3 * (state.yeastPct / 100);
+  const saltPct = 3;
+  const multiplier = 1 + state.hydration / 100 + saltPct / 100 + yeastEffectivePct / 100;
+  const flour = totalDough / multiplier;
+  const water = flour * state.hydration / 100;
+  const salt = flour * saltPct / 100;
+  const yeast = flour * yeastEffectivePct / 100;
+  return { totalDough, flour, water, salt, yeast, yeastEffectivePct, saltPct };
+}
+
+function computeSchedule() {
+  // Bulk, faza główna i finisz to trzy NIEZALEŻNE fazy (każda ze swoim
+  // punktem odniesienia), zgodnie z oryginalnym przepisem: 2h bulk + 20-22h
+  // w spiżarni(14°C) + 1h finisz to trzy osobne kroki, nie wspólna pula
+  // godzin do podziału.
+  const bulkEquiv = state.advBulkH * rateRatio(state.advBulkT);
+  const finalEquiv = state.advFinalH * rateRatio(state.advFinalT);
+  const mainEquiv = state.advBaseMain * (100 / state.yeastPct);
+
+  const bulkH = bulkEquiv / rateRatio(state.kitchenT);
+  const finalH = finalEquiv / rateRatio(state.kitchenT);
+  const mainT = state.path === "fridge" ? state.fridgeT : state.pantryT;
+  const mainH = mainEquiv / rateRatio(mainT);
+  const tooShort = mainH < 1;
+
+  const bake = parseBakeTime();
+  const mainOut = new Date(bake.getTime() - finalH * 3600000);
+  const mainIn = new Date(mainOut.getTime() - mainH * 3600000);
+  const bulkStart = new Date(mainIn.getTime() - bulkH * 3600000);
+
+  return { bulkEquiv, finalEquiv, mainEquiv, tooShort, bulkH, finalH, mainH, mainT, bake, mainOut, mainIn, bulkStart };
+}
+
+function render() {
+  applyStaticI18n();
+
+  // sliders / labels
+  $("balls").value = state.balls; $("balls-val").textContent = state.balls;
+  $("ballMass").value = state.ballMass; $("ballMass-val").textContent = state.ballMass;
+  $("hydration").value = state.hydration; $("hydration-val").textContent = state.hydration + "%";
+  $("yeastPct").value = state.yeastPct; $("yeastPct-val").textContent = state.yeastPct + "%";
+  $("kitchenT").value = state.kitchenT; $("kitchenT-val").textContent = state.kitchenT + "°C";
+  $("pantryT").value = state.pantryT; $("pantryT-val").textContent = state.pantryT + "°C";
+  $("fridgeT").value = state.fridgeT; $("fridgeT-val").textContent = state.fridgeT + "°C";
+  // "en-GB" (not "en-US") so the native time picker renders 24h even in English mode
+  $("bakeTime").lang = state.lang === "en" ? "en-GB" : "pl";
+  $("bakeTime").value = state.bakeTime;
+
+  document.querySelectorAll("#flourType button").forEach(b => b.classList.toggle("active", b.dataset.flour === state.flour));
+  document.querySelectorAll("#pathType button").forEach(b => b.classList.toggle("active", b.dataset.path === state.path));
+
+  const warnKey = FLOUR_PRESETS[state.flour].warnKey;
+  $("flour-warn").style.display = warnKey ? "block" : "none";
+  $("flour-warn").textContent = warnKey ? t(warnKey) : "";
+
+  // ingredients
+  const ing = computeIngredients();
+  $("ingredients-body").innerHTML = `
+    <tr><td>${t("ing_flour")}</td><td class="num">${ing.flour.toFixed(0)} g</td><td class="num">100%</td></tr>
+    <tr><td>${t("ing_water")}</td><td class="num">${ing.water.toFixed(0)} ml</td><td class="num">${state.hydration}%</td></tr>
+    <tr><td>${t("ing_salt")}</td><td class="num">${ing.salt.toFixed(1)} g</td><td class="num">${ing.saltPct}%</td></tr>
+    <tr><td>${t("ing_yeast")}</td><td class="num">${ing.yeast.toFixed(2)} g</td><td class="num">${ing.yeastEffectivePct.toFixed(3)}%</td></tr>
+    <tr><td><strong>${t("ing_total")}</strong></td><td class="num"><strong>${ing.totalDough.toFixed(0)} g</strong></td><td class="num"></td></tr>
+  `;
+  $("yeast-note").textContent = state.yeastPct === 100
+    ? t("yeast_note_base")
+    : t("yeast_note_mod", {
+        pct: state.yeastPct,
+        eff: ing.yeastEffectivePct.toFixed(3),
+        effect: state.yeastPct > 100 ? t("yeast_effect_fast") : t("yeast_effect_slow")
+      });
+
+  // schedule
+  const s = computeSchedule();
+  const pw = I18N[state.lang].pathWords[state.path];
+  const scheduleHtml = [
+    [t("sched_bulkStart"), s.bulkStart, ""],
+    [t("sched_mainIn"), s.mainIn, t("sched_mainIn_sub", { h: fmtHours(s.bulkH) })],
+    [t("sched_toPath", { path: pw.nom, temp: s.mainT }), s.mainIn, ""],
+    [t("sched_mainOut", { path: pw.gen }), s.mainOut, t("sched_mainOut_sub", { h: fmtHours(s.mainH), path: pw.loc })],
+    [t("sched_bake"), s.bake, t("sched_bake_sub", { h: fmtHours(s.finalH) })]
+  ];
+  $("schedule").innerHTML = scheduleHtml.map(([label, time, sub]) => `
+    <div class="schedule-item">
+      <div class="schedule-label">${label}${sub ? `<div class="schedule-sub">${sub}</div>` : ""}</div>
+      <div class="schedule-time">${fmtClock(time)}<span class="day-tag">${dayTag(time, s.bake)}</span></div>
+    </div>
+  `).join("");
+
+  // warnings
+  let warnHtml = "";
+  if (s.tooShort) {
+    warnHtml += `<div class="warning">${t("warn_tooShort", { path: pw.loc, h: fmtHours(s.mainH) })}</div>`;
+  }
+  const bulkHour = s.bulkStart.getHours();
+  if (bulkHour >= 0 && bulkHour < 5) {
+    warnHtml += `<div class="warning">${t("warn_night", { time: fmtClock(s.bulkStart) })}</div>`;
+  }
+  $("warnings").innerHTML = warnHtml;
+
+  // calc details
+  $("calc-details").innerHTML = [
+    t("details_bulk", { equiv: s.bulkEquiv.toFixed(2), tref: state.advTref, baseH: state.advBulkH, baseT: state.advBulkT, h: fmtHours(s.bulkH), kitchenT: state.kitchenT }),
+    t("details_main", { equiv: s.mainEquiv.toFixed(2), tref: state.advTref, baseH: state.advBaseMain, pct: state.yeastPct, h: fmtHours(s.mainH), path: pw.loc, mainT: s.mainT }),
+    t("details_final", { equiv: s.finalEquiv.toFixed(2), tref: state.advTref, baseH: state.advFinalH, baseT: state.advFinalT, h: fmtHours(s.finalH), kitchenT: state.kitchenT }),
+    t("details_rate", { kitchenT: state.kitchenT, r1: rateRatio(state.kitchenT).toFixed(3) }),
+    t("details_rate2", { path: pw.loc, mainT: s.mainT, r2: rateRatio(s.mainT).toFixed(3) })
+  ].join("<br>");
+
+  saveState();
+}
+
+function bindRange(id, key, isFloat) {
+  $(id).addEventListener("input", e => {
+    state[key] = isFloat ? parseFloat(e.target.value) : parseInt(e.target.value, 10);
+    render();
+  });
+}
+bindRange("balls", "balls", false);
+bindRange("ballMass", "ballMass", false);
+bindRange("hydration", "hydration", true);
+bindRange("yeastPct", "yeastPct", false);
+bindRange("kitchenT", "kitchenT", true);
+bindRange("pantryT", "pantryT", true);
+bindRange("fridgeT", "fridgeT", true);
+
+$("bakeTime").addEventListener("input", e => { state.bakeTime = e.target.value; render(); });
+
+document.querySelectorAll("#flourType button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.flour = btn.dataset.flour;
+    state.hydration = FLOUR_PRESETS[state.flour].hydration;
+    render();
+  });
+});
+document.querySelectorAll("#pathType button").forEach(btn => {
+  btn.addEventListener("click", () => { state.path = btn.dataset.path; render(); });
+});
+const SEASON_PRESETS = {
+  winter: { kitchenT: 24, pantryT: 15 },
+  summer: { kitchenT: 25, pantryT: 21 }
+};
+document.querySelectorAll("#seasonPreset button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    Object.assign(state, SEASON_PRESETS[btn.dataset.season]);
+    render();
+  });
+});
+document.querySelectorAll("#langToggle button").forEach(btn => {
+  btn.addEventListener("click", () => { state.lang = btn.dataset.lang; render(); });
+});
+
+function bindAdv(id, key) {
+  $(id).addEventListener("input", e => {
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v)) { state[key] = v; render(); }
+  });
+}
+bindAdv("adv-tref", "advTref");
+bindAdv("adv-double", "advDouble");
+bindAdv("adv-basemain", "advBaseMain");
+bindAdv("adv-bulkh", "advBulkH");
+bindAdv("adv-bulkt", "advBulkT");
+bindAdv("adv-finalh", "advFinalH");
+bindAdv("adv-finalt", "advFinalT");
+
+function initAdvInputs() {
+  $("adv-tref").value = state.advTref;
+  $("adv-double").value = state.advDouble;
+  $("adv-basemain").value = state.advBaseMain;
+  $("adv-bulkh").value = state.advBulkH;
+  $("adv-bulkt").value = state.advBulkT;
+  $("adv-finalh").value = state.advFinalH;
+  $("adv-finalt").value = state.advFinalT;
+}
+
+loadState();
+initAdvInputs();
+render();
+</script>
+</body>
+</html>
